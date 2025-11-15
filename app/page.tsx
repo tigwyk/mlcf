@@ -1,26 +1,10 @@
 import Link from 'next/link';
+import Navigation from '@/app/components/Navigation';
 
 export default function Home() {
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
-      {/* Navigation */}
-      <nav className="bg-gray-800 border-b border-gray-700">
-        <div className="max-w-7xl mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="text-2xl font-bold">
-              <span className="text-blue-400">MLCF</span>
-            </Link>
-            <div className="flex gap-6">
-              <Link href="/builds" className="hover:text-blue-400 transition-colors">
-                Builds
-              </Link>
-              <Link href="/guides" className="hover:text-purple-400 transition-colors">
-                Guides
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      <Navigation />
 
       {/* Hero Section */}
       <div className="bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 py-24 px-4">

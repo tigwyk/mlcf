@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Navigation from '@/app/components/Navigation';
 
 interface Guide {
   id: string;
@@ -48,6 +49,7 @@ export default function GuidesPage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
+      <Navigation />
       <div className="bg-gradient-to-r from-purple-900 to-pink-900 py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-5xl font-bold mb-4">Strategy Guides</h1>

@@ -1,26 +1,48 @@
 /**
  * Skill Export Parser for Q-Up
  * 
- * This parser attempts to decode Q-Up skill export strings.
- * Since the format is undocumented and the game is closed-source,
- * this will need to be reverse-engineered from real examples.
+ * Format: QUP-LOADOUT-v1:{base64-encoded-json}
  * 
- * TODO: Update this parser as we learn more about the export format
+ * The JSON contains:
+ * - character: number (character ID, e.g., 1 = Leila the Medic)
+ * - nodes: array of skill nodes with:
+ *   - name: string (empty for unlocked hex nodes/placeholders)
+ *   - guid: string (unique identifier for skill type)
+ *   - level: number (skill level)
+ *   - gridPosition: {x, y, z} (cubic hex coordinates where x+y+z=0)
+ *   - isInventory: boolean (false for placed skills)
  */
 
 export interface ParsedSkills {
   raw: string;
+  character?: number;
+  characterName?: string;
   skills: Skill[];
   isValid: boolean;
   error?: string;
 }
 
 export interface Skill {
-  id: number;
-  name?: string;
-  level?: number;
-  position?: number;
+  name: string;
+  guid: string;
+  level: number;
+  gridPosition: {
+    x: number;
+    y: number;
+    z: number;
+  };
+  isInventory: boolean;
 }
+
+interface QUpLoadout {
+  character: number;
+  nodes: Skill[];
+}
+
+const CHARACTER_NAMES: Record<number, string> = {
+  1: 'Leila the Medic',
+  // Add other characters as discovered
+};
 
 /**
  * Parses a Q-Up skill export string
@@ -38,68 +60,50 @@ export function parseSkillExport(exportString: string): ParsedSkills {
   }
 
   try {
-    // Basic validation - check if it looks like it could be a valid export
-    // We'll need to update this as we learn the actual format
-    
-    // For now, we'll do basic parsing attempts:
-    // 1. Check if it's base64
-    // 2. Check if it's JSON
-    // 3. Check if it's a custom delimiter format
-    
-    // Attempt base64 decode
-    try {
-      const decoded = Buffer.from(exportString, 'base64').toString('utf-8');
-      // Try to parse as JSON
-      const jsonData = JSON.parse(decoded);
-      if (Array.isArray(jsonData)) {
-        return {
-          raw: exportString,
-          skills: jsonData.map((skill, idx) => ({
-            id: skill.id || idx,
-            name: skill.name,
-            level: skill.level,
-            position: skill.position || idx,
-          })),
-          isValid: true,
-        };
-      }
-    } catch {
-      // Not base64 or not JSON, continue
+    // Check for QUP-LOADOUT-v1 prefix
+    if (!exportString.startsWith('QUP-LOADOUT-v1:')) {
+      return {
+        raw: exportString,
+        skills: [],
+        isValid: false,
+        error: 'Invalid format: expected QUP-LOADOUT-v1 prefix',
+      };
     }
 
-    // Attempt direct JSON parse
-    try {
-      const jsonData = JSON.parse(exportString);
-      if (Array.isArray(jsonData)) {
-        return {
-          raw: exportString,
-          skills: jsonData.map((skill, idx) => ({
-            id: skill.id || idx,
-            name: skill.name,
-            level: skill.level,
-            position: skill.position || idx,
-          })),
-          isValid: true,
-        };
-      }
-    } catch {
-      // Not JSON, continue
+    // Extract base64 payload
+    const base64Payload = exportString.substring('QUP-LOADOUT-v1:'.length);
+    
+    // Decode base64
+    const decoded = Buffer.from(base64Payload, 'base64').toString('utf-8');
+    
+    // Parse JSON
+    const loadout: QUpLoadout = JSON.parse(decoded);
+    
+    if (!loadout.character || !Array.isArray(loadout.nodes)) {
+      return {
+        raw: exportString,
+        skills: [],
+        isValid: false,
+        error: 'Invalid loadout structure: missing character or nodes',
+      };
     }
 
-    // If we can't parse it, store it as-is for later analysis
-    // This allows users to submit builds even if we haven't cracked the format yet
+    // Filter out empty nodes (unlocked hexes/placeholders)
+    const namedSkills = loadout.nodes.filter(node => node.name && node.name.trim() !== '');
+
     return {
       raw: exportString,
-      skills: [],
-      isValid: true, // Mark as valid so it can be stored
-      error: 'Export format not yet decoded - stored for analysis',
+      character: loadout.character,
+      characterName: CHARACTER_NAMES[loadout.character] || `Character ${loadout.character}`,
+      skills: namedSkills,
+      isValid: true,
     };
   } catch (error) {
     return {
       raw: exportString,
       skills: [],
       isValid: false,
-      error: error instanceof Error ? error.message : 'Unknown parsing error',
+      error: error instanceof Error ? error.message : 'Failed to parse export string',
     };
   }
 }
@@ -114,7 +118,8 @@ export function validateSkillExport(exportString: string): boolean {
     return false;
   }
   
-  // For now, accept any non-empty string
-  // We'll refine this as we learn more about the format
-  return exportString.length > 0 && exportString.length < 10000;
+  // Check for correct prefix and reasonable length
+  return exportString.startsWith('QUP-LOADOUT-v1:') && 
+         exportString.length > 20 && 
+         exportString.length < 50000;
 }

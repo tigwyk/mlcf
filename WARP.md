@@ -49,10 +49,22 @@ This is a **Next.js 16 App Router** project with the following key architecture 
    - All routes use `NextRequest`/`NextResponse` (no edge runtime)
 
 3. **Domain Logic**: The Q-Up Skill Parser (`lib/skillParser.ts`)
-   - Q-Up's export format is **undocumented** and being reverse-engineered
-   - Parser attempts Base64 → JSON, direct JSON, then marks as valid anyway to collect examples
-   - `validateSkillExport()` accepts any non-empty string under 10k characters
-   - **Do not assume the format is known** - treat export strings as opaque data for now
+   - **Export Format Discovered**: `QUP-LOADOUT-v1:{base64-encoded-json}`
+   - JSON structure:
+     ```typescript
+     {
+       character: number,  // Character ID (1 = Leila the Medic)
+       nodes: Array<{
+         name: string,          // Empty for unlocked hex nodes/placeholders
+         guid: string,          // Unique skill identifier
+         level: number,         // Skill level
+         gridPosition: {x, y, z},  // Cubic hex coordinates (x+y+z=0)
+         isInventory: boolean   // false for placed skills
+       }>
+     }
+     ```
+   - Parser filters out empty nodes to extract only named skills
+   - Skill trigger types, charge counts, and connections are NOT in export (must be hardcoded by skill GUID)
 
 4. **Data Model Patterns**:
    - Tags are shared between builds and guides (many-to-many relations)
@@ -82,11 +94,26 @@ This is a **Next.js 16 App Router** project with the following key architecture 
 - Search functionality
 - Markdown rendering for guides (stored as raw markdown)
 
-### Skill Export Parser Status
-The parser in `lib/skillParser.ts` is a **stub**. The actual Q-Up export format is unknown. When working with it:
-- Accept any export string submission to collect real examples
-- Do not try to validate structure beyond length checks
-- If implementing parser improvements, check with maintainer first about real examples
+### Q-Up Game Mechanics
+Q-Up is a competitive coin flipping game with a complex skill system:
+
+**Skill Grid System:**
+- Skills are placed on a **hexagonal grid** using cubic coordinates (x, y, z)
+- Grid positions are numbered sequentially (1-181+) for activation order
+- **Hex skills** (e.g., Level 50, Level 40) are fixed unlocks at specific positions
+- **Round skills** (e.g., Battle Medic, Angel) can be placed anywhere
+
+**Skill Mechanics:**
+- Skills have **charges** (dots below skill icon) - number of times they can activate per coinflip
+- Once depleted, skills recharge for the next coinflip
+- Skills can trigger other skills, creating chain reactions
+- Trigger types: ON FLIP, ON WIN, ON LOSS, ON TRIGGER
+- Skills execute in grid number order, but chains can interrupt sequence
+
+**Skill Export Format:**
+- Format: `QUP-LOADOUT-v1:{base64-json}` (see parser for full structure)
+- Export contains character, skill placements, and grid positions
+- Does NOT contain trigger types or charge counts (lookup required by GUID)
 
 ## Code Patterns
 

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import Navigation from '@/app/components/Navigation';
 
 interface Build {
   id: string;
@@ -54,6 +55,7 @@ export default function BuildsPage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
+      <Navigation />
       <div className="bg-gradient-to-r from-blue-900 to-purple-900 py-12 px-4">
         <div className="max-w-7xl mx-auto">
           <h1 className="text-5xl font-bold mb-4">Major League Coin Flipping</h1>
@@ -110,9 +112,10 @@ export default function BuildsPage() {
         ) : (
           <div className="grid gap-4">
             {builds.map((build) => (
-              <div
+              <Link
                 key={build.id}
-                className="bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-colors"
+                href={`/builds/${build.id}`}
+                className="block bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-colors cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-3">
                   <div>
@@ -157,7 +160,7 @@ export default function BuildsPage() {
                   </div>
                   <span>{new Date(build.createdAt).toLocaleDateString()}</span>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         )}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Navigation from '@/app/components/Navigation';
 
 export default function SubmitGuide() {
   const router = useRouter();
@@ -52,8 +53,10 @@ export default function SubmitGuide() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 py-12 px-4">
-      <div className="max-w-5xl mx-auto">
+    <div className="min-h-screen bg-gray-900 text-gray-100">
+      <Navigation />
+      <div className="py-12 px-4">
+        <div className="max-w-5xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-center">
           Write a Strategy Guide
         </h1>
@@ -167,6 +170,7 @@ export default function SubmitGuide() {
             {loading ? 'Publishing...' : 'Publish Guide'}
           </button>
         </form>
+        </div>
       </div>
     </div>
   );

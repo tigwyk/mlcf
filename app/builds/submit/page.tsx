@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Navigation from '@/app/components/Navigation';
 
 export default function SubmitBuild() {
   const router = useRouter();
@@ -51,8 +52,10 @@ export default function SubmitBuild() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 py-12 px-4">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-gray-900 text-gray-100">
+      <Navigation />
+      <div className="py-12 px-4">
+        <div className="max-w-3xl mx-auto">
         <h1 className="text-4xl font-bold mb-8 text-center">
           Submit Your Pro Build
         </h1>
@@ -151,6 +154,7 @@ export default function SubmitBuild() {
             {loading ? 'Submitting...' : 'Submit Build'}
           </button>
         </form>
+        </div>
       </div>
     </div>
   );
