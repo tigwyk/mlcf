@@ -1,0 +1,61 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Build {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  exportString String  // The Q-Up skill export string
+  author      String
+  upvotes     Int      @default(0)
+  downvotes   Int      @default(0)
+  views       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tags        Tag[]    @relation("BuildToTag")
+  comments    Comment[]
+}
+
+model Guide {
+  id          String   @id @default(cuid())
+  title       String
+  content     String   // Markdown content
+  author      String
+  summary     String?
+  upvotes     Int      @default(0)
+  downvotes   Int      @default(0)
+  views       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  tags        Tag[]    @relation("GuideToTag")
+  comments    Comment[]
+}
+
+model Tag {
+  id     String  @id @default(cuid())
+  name   String  @unique
+  builds Build[] @relation("BuildToTag")
+  guides Guide[] @relation("GuideToTag")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  author    String
+  buildId   String?
+  guideId   String?
+  build     Build?   @relation(fields: [buildId], references: [id], onDelete: Cascade)
+  guide     Guide?   @relation(fields: [guideId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
