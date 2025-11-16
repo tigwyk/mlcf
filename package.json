@@ -5,9 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "prisma generate && next build",
-    "start": "npm run fix-migration && next start",
-    "start:normal": "prisma migrate deploy && next start",
-    "fix-migration": "prisma migrate resolve --rolled-back 20251115185751_init || true && prisma migrate deploy",
+    "start": "prisma migrate deploy && next start",
     "lint": "eslint",
     "postinstall": "prisma generate"
   },
