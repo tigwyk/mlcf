@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import SteamSignIn from '@/components/SteamSignIn';
 
 export default function Navigation() {
   return (
@@ -8,7 +9,7 @@ export default function Navigation() {
           <Link href="/" className="text-2xl font-bold">
             <span className="text-blue-400">MLCF</span>
           </Link>
-          <div className="flex gap-6">
+          <div className="flex gap-6 items-center">
             <Link href="/calculator" className="hover:text-green-400 transition-colors">
               Calculator
             </Link>
@@ -18,6 +19,7 @@ export default function Navigation() {
             <Link href="/guides" className="hover:text-purple-400 transition-colors">
               Guides
             </Link>
+            <SteamSignIn />
           </div>
         </div>
       </div>
