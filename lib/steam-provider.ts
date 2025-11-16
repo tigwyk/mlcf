@@ -18,12 +18,16 @@ export default function SteamProvider(
     wellKnown: undefined,
     authorization: {
       url: "https://steamcommunity.com/openid/login",
-      params: {
-        "openid.mode": "checkid_setup",
-        "openid.ns": "http://specs.openid.net/auth/2.0",
-        "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
-        "openid.claimed_id":
-          "http://specs.openid.net/auth/2.0/identifier_select",
+      params(context: any) {
+        const returnUrl = context.callbackUrl || `${process.env.NEXTAUTH_URL}/api/auth/callback/steam`;
+        return {
+          "openid.mode": "checkid_setup",
+          "openid.ns": "http://specs.openid.net/auth/2.0",
+          "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
+          "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
+          "openid.return_to": returnUrl,
+          "openid.realm": process.env.NEXTAUTH_URL || "http://localhost:3000",
+        };
       },
     },
     token: {
