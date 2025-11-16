@@ -31,12 +31,24 @@ interface Guide {
 export default function GuideDetailPage() {
   const params = useParams();
   const [guide, setGuide] = useState<Guide | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     fetchGuide();
+    fetchUser();
   }, [params.id]);
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch('/api/auth/steam/session');
+      const data = await response.json();
+      setUser(data.user);
+    } catch (err) {
+      // User not logged in, that's okay
+    }
+  };
 
   const fetchGuide = async () => {
     try {
@@ -159,9 +171,19 @@ export default function GuideDetailPage() {
       
       <div className="bg-gradient-to-r from-purple-900 to-pink-900 py-8 px-4">
         <div className="max-w-4xl mx-auto">
-          <Link href="/guides" className="text-purple-300 hover:text-purple-200 mb-4 inline-block">
-            ← Back to Guides
-          </Link>
+          <div className="flex justify-between items-start mb-4">
+            <Link href="/guides" className="text-purple-300 hover:text-purple-200">
+              ← Back to Guides
+            </Link>
+            {user && guide.author?.id === user.id && (
+              <Link
+                href={`/guides/${guide.id}/edit`}
+                className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded text-sm transition-colors"
+              >
+                Edit Guide
+              </Link>
+            )}
+          </div>
           <h1 className="text-4xl font-bold mb-2">{guide.title}</h1>
           <p className="text-gray-300">
             by {guide.author?.username || 'Anonymous'} • {new Date(guide.createdAt).toLocaleDateString()}
