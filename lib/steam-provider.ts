@@ -18,6 +18,7 @@ export default function SteamProvider(
     name: "Steam",
     type: "oidc",
     issuer: "https://steamcommunity.com",
+    checks: ["none"],
     authorization: {
       url: "https://steamcommunity.com/openid/login",
       params: {
