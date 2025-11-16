@@ -116,9 +116,11 @@ export default function GuidesPage() {
               >
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">
-                    <h2 className="text-2xl font-bold mb-2 text-purple-300">
-                      {guide.title}
-                    </h2>
+                    <Link href={`/guides/${guide.id}`}>
+                      <h2 className="text-2xl font-bold mb-2 text-purple-300 hover:text-purple-200 transition-colors cursor-pointer">
+                        {guide.title}
+                      </h2>
+                    </Link>
                     <p className="text-sm text-gray-400 mb-3">
                       by {guide.author?.username || 'Anonymous'} • {new Date(guide.createdAt).toLocaleDateString()}
                     </p>
