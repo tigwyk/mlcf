@@ -94,6 +94,9 @@ export async function GET(request: NextRequest) {
       avatar: user.avatar,
       qupPlaytime: gameStats?.playtimeForever,
       ownsQup: gameStats?.ownsGame,
+      achievementsUnlocked: gameStats?.achievementsUnlocked,
+      achievementsTotal: gameStats?.achievementsTotal,
+      achievementPercentage: gameStats?.achievementPercentage,
     };
     await session.save();
 

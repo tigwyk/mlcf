@@ -8,6 +8,9 @@ export interface SessionData {
     avatar: string | null;
     qupPlaytime?: number; // minutes
     ownsQup?: boolean;
+    achievementsUnlocked?: number;
+    achievementsTotal?: number;
+    achievementPercentage?: number;
   };
 }
 

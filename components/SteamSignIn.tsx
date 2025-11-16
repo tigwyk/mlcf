@@ -10,6 +10,9 @@ interface User {
   avatar: string | null;
   qupPlaytime?: number;
   ownsQup?: boolean;
+  achievementsUnlocked?: number;
+  achievementsTotal?: number;
+  achievementPercentage?: number;
 }
 
 export default function SteamSignIn() {
@@ -53,13 +56,27 @@ export default function SteamSignIn() {
             />
           )}
           <div className="flex flex-col">
-            <span className="text-sm font-medium">
-              {user.username}
-            </span>
-            {user.ownsQup && user.qupPlaytime !== undefined && (
-              <span className="text-xs text-gray-400">
-                Q-Up: {formatPlaytime(user.qupPlaytime)}
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-medium">
+                {user.username}
               </span>
+              {user.achievementPercentage === 100 && (
+                <span className="text-xs bg-yellow-500 text-black px-1.5 py-0.5 rounded font-bold">
+                  💯
+                </span>
+              )}
+            </div>
+            {user.ownsQup && (
+              <div className="flex items-center gap-2 text-xs text-gray-400">
+                {user.qupPlaytime !== undefined && (
+                  <span>{formatPlaytime(user.qupPlaytime)}</span>
+                )}
+                {user.achievementsTotal && user.achievementsTotal > 0 && (
+                  <span>
+                    🏆 {user.achievementsUnlocked}/{user.achievementsTotal}
+                  </span>
+                )}
+              </div>
             )}
           </div>
         </div>

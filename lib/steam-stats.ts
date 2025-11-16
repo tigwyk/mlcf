@@ -6,6 +6,9 @@ export interface GameStats {
   playtime2Weeks?: number; // in minutes
   lastPlayed?: number; // unix timestamp
   ownsGame: boolean;
+  achievementsUnlocked?: number;
+  achievementsTotal?: number;
+  achievementPercentage?: number;
 }
 
 export async function getPlayerGameStats(
@@ -19,26 +22,50 @@ export async function getPlayerGameStats(
 
   try {
     // Get owned games with playtime
-    const response = await fetch(
+    const gamesResponse = await fetch(
       `https://api.steampowered.com/IPlayerService/GetOwnedGames/v1/?key=${apiKey}&steamid=${steamId}&appids_filter[0]=${QUPUP_APP_ID}&include_played_free_games=1&include_appinfo=1`
     );
 
-    const data = await response.json();
+    const gamesData = await gamesResponse.json();
 
-    if (!data.response || !data.response.games || data.response.games.length === 0) {
+    if (!gamesData.response || !gamesData.response.games || gamesData.response.games.length === 0) {
       return {
         playtimeForever: 0,
         ownsGame: false,
       };
     }
 
-    const game = data.response.games[0];
+    const game = gamesData.response.games[0];
+
+    // Get player achievements
+    const achievementsResponse = await fetch(
+      `https://api.steampowered.com/ISteamUserStats/GetPlayerAchievements/v1/?key=${apiKey}&steamid=${steamId}&appid=${QUPUP_APP_ID}`
+    );
+
+    let achievementsUnlocked = 0;
+    let achievementsTotal = 0;
+    let achievementPercentage = 0;
+
+    if (achievementsResponse.ok) {
+      const achievementsData = await achievementsResponse.json();
+      if (achievementsData.playerstats?.achievements) {
+        const achievements = achievementsData.playerstats.achievements;
+        achievementsTotal = achievements.length;
+        achievementsUnlocked = achievements.filter((a: any) => a.achieved === 1).length;
+        achievementPercentage = achievementsTotal > 0 
+          ? Math.round((achievementsUnlocked / achievementsTotal) * 100) 
+          : 0;
+      }
+    }
 
     return {
       playtimeForever: game.playtime_forever || 0,
       playtime2Weeks: game.playtime_2weeks,
       lastPlayed: game.rtime_last_played,
       ownsGame: true,
+      achievementsUnlocked,
+      achievementsTotal,
+      achievementPercentage,
     };
   } catch (error) {
     console.error("Error fetching Steam game stats:", error);
