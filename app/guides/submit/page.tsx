@@ -1,21 +1,41 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navigation from '@/app/components/Navigation';
 
+interface User {
+  id: string;
+  steamId: string;
+  username: string;
+  avatar: string | null;
+}
+
 export default function SubmitGuide() {
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const [formData, setFormData] = useState({
     title: '',
     content: '',
-    author: '',
     summary: '',
     tags: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [preview, setPreview] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/steam/session')
+      .then((res) => res.json())
+      .then((data) => {
+        setUser(data.user);
+        setSessionLoading(false);
+      })
+      .catch(() => {
+        setSessionLoading(false);
+      });
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +54,9 @@ export default function SubmitGuide() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          ...formData,
+          title: formData.title,
+          content: formData.content,
+          summary: formData.summary,
           tags,
         }),
       });
@@ -51,6 +73,44 @@ export default function SubmitGuide() {
       setLoading(false);
     }
   };
+
+  if (sessionLoading) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100">
+        <Navigation />
+        <div className="py-12 px-4 text-center">
+          <p className="text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return (
+      <div className="min-h-screen bg-gray-900 text-gray-100">
+        <Navigation />
+        <div className="py-12 px-4">
+          <div className="max-w-3xl mx-auto text-center">
+            <h1 className="text-4xl font-bold mb-4">Sign In Required</h1>
+            <p className="text-gray-400 mb-8">
+              You must be signed in with Steam to write guides.
+            </p>
+            <a
+              href="/api/auth/steam/login"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-black text-white font-bold rounded border border-gray-600 hover:bg-gray-800 transition-colors"
+            >
+              <img
+                src="/steam-icon.svg"
+                alt="Steam"
+                className="w-5 h-5"
+              />
+              Sign in with Steam
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
@@ -83,21 +143,6 @@ export default function SubmitGuide() {
               value={formData.title}
               onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               placeholder="Advanced Psychology Tactics for Competitive Flipping"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="author" className="block text-sm font-medium mb-2">
-              Your Name *
-            </label>
-            <input
-              type="text"
-              id="author"
-              required
-              className="w-full px-4 py-2 bg-gray-700 border border-gray-600 rounded focus:outline-none focus:border-blue-500"
-              value={formData.author}
-              onChange={(e) => setFormData({ ...formData, author: e.target.value })}
-              placeholder="CoinMaster2000"
             />
           </div>
 

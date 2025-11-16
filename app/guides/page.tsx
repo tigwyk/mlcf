@@ -8,7 +8,11 @@ interface Guide {
   id: string;
   title: string;
   summary: string | null;
-  author: string;
+  author?: {
+    id: string;
+    username: string;
+    avatar: string | null;
+  };
   upvotes: number;
   downvotes: number;
   views: number;
@@ -116,7 +120,7 @@ export default function GuidesPage() {
                       {guide.title}
                     </h2>
                     <p className="text-sm text-gray-400 mb-3">
-                      by {guide.author} • {new Date(guide.createdAt).toLocaleDateString()}
+                      by {guide.author?.username || 'Anonymous'} • {new Date(guide.createdAt).toLocaleDateString()}
                     </p>
                     {guide.summary && (
                       <p className="text-gray-300 mb-4">{guide.summary}</p>

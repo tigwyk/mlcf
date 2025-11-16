@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { auth } from '@/lib/auth';
+import { getIronSession } from 'iron-session';
+import { cookies } from 'next/headers';
+import { sessionOptions, SessionData } from '@/lib/session';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
     // Check authentication
-    const session = await auth();
+    const cookieStore = await cookies();
+    const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
+    
     if (!session?.user) {
       return NextResponse.json(
         { error: 'Unauthorized - please sign in' },
