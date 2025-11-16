@@ -6,6 +6,10 @@ export const dynamic = 'force-dynamic';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import Navigation from '@/app/components/Navigation';
+import BuildSkillGrid from '@/app/components/BuildSkillGrid';
+import CopyButton from '@/app/components/CopyButton';
+import { parseSkillExport } from '@/lib/skillParser';
+import { getSkillByGuid } from '@/lib/skillData';
 
 interface Build {
   id: string;
@@ -26,6 +30,7 @@ export default function BuildDetailPage() {
   const [build, setBuild] = useState<Build | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [showExportString, setShowExportString] = useState(false);
 
   useEffect(() => {
     fetchBuild();
@@ -51,6 +56,20 @@ export default function BuildDetailPage() {
     if (total === 0) return 'N/A';
     return `${Math.round((upvotes / total) * 100)}%`;
   };
+
+  // Parse skills for visualization
+  const parsedSkills = build ? parseSkillExport(build.exportString) : null;
+  const placedSkills = parsedSkills?.isValid
+    ? parsedSkills.skills.map((skill) => {
+        const skillDef = getSkillByGuid(skill.guid);
+        return skillDef
+          ? {
+              skill: skillDef,
+              position: skill.gridPosition,
+            }
+          : null;
+      }).filter((s): s is { skill: any; position: any } => s !== null)
+    : [];
 
   if (loading) {
     return (
@@ -140,30 +159,72 @@ export default function BuildDetailPage() {
           </div>
         )}
 
-        {/* Skill Export String */}
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 mb-6">
-          <h2 className="text-xl font-bold mb-3">Skill Export String</h2>
-          <div className="bg-gray-900 border border-gray-700 rounded p-4 overflow-x-auto">
-            <code className="text-sm text-green-400 font-mono break-all">
-              {build.exportString}
-            </code>
+        {/* Skill Grid Visualization */}
+        {parsedSkills?.isValid && (
+          <div className="mb-6">
+            <BuildSkillGrid
+              placedSkills={placedSkills}
+              characterLevel={50}
+            />
           </div>
-          <div className="mt-3 flex gap-3">
-            <button
-              onClick={() => {
-                navigator.clipboard.writeText(build.exportString);
-              }}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm transition-colors"
-            >
-              Copy to Clipboard
-            </button>
+        )}
+
+        {/* Export String Actions */}
+        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6 mb-6">
+          <h2 className="text-xl font-bold mb-3">Export Build</h2>
+          <p className="text-gray-400 text-sm mb-4">
+            Use the export string to share this build or import it into the game.
+          </p>
+          <div className="flex gap-3 flex-wrap">
+            <CopyButton textToCopy={build.exportString} />
             <Link
               href={`/calculator?import=${encodeURIComponent(build.exportString)}`}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm transition-colors inline-block"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm transition-colors inline-flex items-center gap-2"
             >
+              <svg
+                className="w-4 h-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
               Open in Calculator
             </Link>
+            <button
+              onClick={() => setShowExportString(!showExportString)}
+              className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded text-sm transition-colors inline-flex items-center gap-2"
+            >
+              <svg
+                className={`w-4 h-4 transition-transform ${showExportString ? 'rotate-180' : ''}`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+              {showExportString ? 'Hide' : 'Show'} Export String
+            </button>
           </div>
+          
+          {/* Collapsible Export String */}
+          {showExportString && (
+            <div className="mt-4 bg-gray-900 border border-gray-700 rounded p-4 overflow-x-auto">
+              <code className="text-sm text-green-400 font-mono break-all">
+                {build.exportString}
+              </code>
+            </div>
+          )}
         </div>
 
         {/* Comments Section */}
