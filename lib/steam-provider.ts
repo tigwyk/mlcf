@@ -47,6 +47,7 @@ export default function SteamProvider(
       },
     },
     userinfo: {
+      url: "https://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/",
       async request(context: any) {
         const steamId = context.tokens.access_token;
         const apiKey = process.env.STEAM_API_KEY;
