@@ -8,6 +8,8 @@ interface User {
   steamId: string;
   username: string;
   avatar: string | null;
+  qupPlaytime?: number;
+  ownsQup?: boolean;
 }
 
 export default function SteamSignIn() {
@@ -33,6 +35,12 @@ export default function SteamSignIn() {
     return <div>Loading...</div>;
   }
 
+  const formatPlaytime = (minutes?: number) => {
+    if (!minutes) return null;
+    const hours = Math.floor(minutes / 60);
+    return hours > 0 ? `${hours.toLocaleString()}h` : `${minutes}m`;
+  };
+
   if (user) {
     return (
       <div className="flex items-center gap-4">
@@ -44,9 +52,16 @@ export default function SteamSignIn() {
               className="w-8 h-8 rounded-full"
             />
           )}
-          <span className="text-sm font-medium">
-            {user.username}
-          </span>
+          <div className="flex flex-col">
+            <span className="text-sm font-medium">
+              {user.username}
+            </span>
+            {user.ownsQup && user.qupPlaytime !== undefined && (
+              <span className="text-xs text-gray-400">
+                Q-Up: {formatPlaytime(user.qupPlaytime)}
+              </span>
+            )}
+          </div>
         </div>
         <button
           onClick={handleSignOut}

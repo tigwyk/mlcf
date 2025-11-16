@@ -3,6 +3,7 @@ import { getIronSession } from "iron-session";
 import { cookies } from "next/headers";
 import { sessionOptions, SessionData } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
+import { getPlayerGameStats } from "@/lib/steam-stats";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
@@ -80,6 +81,9 @@ export async function GET(request: NextRequest) {
       },
     });
 
+    // Fetch Q-Up game stats
+    const gameStats = await getPlayerGameStats(steamId);
+
     // Create session
     const cookieStore = await cookies();
     const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
@@ -88,6 +92,8 @@ export async function GET(request: NextRequest) {
       steamId: user.steamId,
       username: user.username,
       avatar: user.avatar,
+      qupPlaytime: gameStats?.playtimeForever,
+      ownsQup: gameStats?.ownsGame,
     };
     await session.save();
 

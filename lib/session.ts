@@ -6,6 +6,8 @@ export interface SessionData {
     steamId: string;
     username: string;
     avatar: string | null;
+    qupPlaytime?: number; // minutes
+    ownsQup?: boolean;
   };
 }
 
