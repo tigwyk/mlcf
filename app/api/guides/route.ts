@@ -1,15 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { auth } from '@/lib/auth';
 import { prisma } from '@/lib/prisma';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check authentication
+    const session = await auth();
+    if (!session?.user) {
+      return NextResponse.json(
+        { error: 'Unauthorized - please sign in' },
+        { status: 401 }
+      );
+    }
+
     const body = await request.json();
-    const { title, content, author, summary, tags } = body;
+    const { title, content, summary, tags } = body;
 
     // Validate required fields
-    if (!title || !content || !author) {
+    if (!title || !content) {
       return NextResponse.json(
-        { error: 'Title, content, and author are required' },
+        { error: 'Title and content are required' },
         { status: 400 }
       );
     }
@@ -33,7 +43,7 @@ export async function POST(request: NextRequest) {
       data: {
         title,
         content,
-        author,
+        authorId: session.user.id,
         summary,
         tags: {
           connect: tagConnections,
@@ -41,6 +51,13 @@ export async function POST(request: NextRequest) {
       },
       include: {
         tags: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+          },
+        },
       },
     });
 
@@ -73,6 +90,13 @@ export async function GET(request: NextRequest) {
         : undefined,
       include: {
         tags: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+          },
+        },
         _count: {
           select: { comments: true },
         },

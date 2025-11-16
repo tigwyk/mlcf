@@ -36,17 +36,20 @@ npx prisma db push                         # Push schema changes without migrati
 
 This is a **Next.js 16 App Router** project with the following key architecture decisions:
 
-1. **Database Layer**: SQLite via Prisma ORM
+1. **Database Layer**: PostgreSQL via Prisma ORM
    - Prisma client is generated to `app/generated/prisma` (non-standard location)
    - Singleton pattern in `lib/prisma.ts` prevents multiple instances
-   - Schema supports builds, guides, tags (many-to-many), and comments
+   - Schema supports users, authentication (NextAuth), builds, guides, tags, and comments
+   - User authentication via Steam OpenID 2.0 with database-backed sessions
 
 2. **API Layer**: RESTful API routes in `app/api/`
-   - `POST /api/builds` - Create build with tags (upsert pattern)
+   - `POST /api/builds` - Create build (requires authentication)
    - `GET /api/builds?sortBy=<field>&order=<asc|desc>&tag=<name>` - List/filter builds
-   - `POST /api/guides` - Create guide with tags (upsert pattern)
+   - `POST /api/guides` - Create guide (requires authentication)
    - `GET /api/guides?sortBy=<field>&order=<asc|desc>&tag=<name>` - List/filter guides
+   - `GET/POST /api/auth/[...nextauth]` - NextAuth endpoints for Steam OAuth
    - All routes use `NextRequest`/`NextResponse` (no edge runtime)
+   - Protected routes check authentication via `getServerSession(authOptions)`
 
 3. **Domain Logic**: The Q-Up Skill Parser (`lib/skillParser.ts`)
    - **Export Format Discovered**: `QUP-LOADOUT-v1:{base64-encoded-json}`
@@ -66,8 +69,16 @@ This is a **Next.js 16 App Router** project with the following key architecture 
    - Parser filters out empty nodes to extract only named skills
    - Skill trigger types, charge counts, and connections are NOT in export (must be hardcoded by skill GUID)
 
-4. **Data Model Patterns**:
+4. **Authentication Layer**: NextAuth v5 with Steam OpenID 2.0
+   - Custom Steam provider in `lib/steam-provider.ts`
+   - Auth configuration in `lib/auth.ts` with PrismaAdapter
+   - Database-backed sessions (not JWT)
+   - User model stores Steam ID, username, and avatar
+   - Account/Session models follow NextAuth schema
+
+5. **Data Model Patterns**:
    - Tags are shared between builds and guides (many-to-many relations)
+   - Builds and guides reference User via `authorId` foreign key
    - Voting system: separate `upvotes`/`downvotes` counters (no vote history)
    - Comments schema exists but has no UI implementation yet
    - All models use `cuid()` for IDs
@@ -80,19 +91,25 @@ This is a **Next.js 16 App Router** project with the following key architecture 
 
 - **Path Aliases**: `@/*` maps to project root (see `tsconfig.json`)
 
-- **Database**: Uses SQLite (`file:./dev.db`) in development
-  - For production deployment, migrate to PostgreSQL
-  - Current schema uses no SQLite-specific features
+- **Database**: Uses PostgreSQL in both development and production
+  - Development connects to Railway production database
+  - Schema is PostgreSQL-specific (deployed via Railway)
 
 ## Current State & Known Gaps
+
+### Implemented
+- ✅ User authentication via Steam OAuth
+- ✅ Protected API routes (builds/guides require auth)
+- ✅ User sessions stored in database
+- ✅ Author attribution on builds/guides
 
 ### Not Implemented
 - Individual build/guide detail pages (only list views exist)
 - Comment system UI (schema exists, no routes/components)
-- User authentication (authors are just strings)
 - Voting UI (vote counters exist but can't be modified via UI)
 - Search functionality
 - Markdown rendering for guides (stored as raw markdown)
+- Custom sign-in/error pages (using NextAuth defaults)
 
 ### Q-Up Game Mechanics
 Q-Up is a competitive coin flipping game with a complex skill system:
@@ -132,8 +149,19 @@ const tagConnections = await Promise.all(
 );
 ```
 
+### Authentication Pattern
+Protected API routes check authentication:
+```typescript
+const session = await auth();
+if (!session?.user) {
+  return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+}
+// Use session.user.id as authorId
+```
+
 ### API Error Handling
 All API routes follow this pattern:
+- Check authentication → 401 (for protected routes)
 - Validate required fields → 400
 - Business logic errors → 400 with specific message
 - Unexpected errors → 500 with generic message
@@ -141,7 +169,12 @@ All API routes follow this pattern:
 
 ## Deployment Notes
 
-- Ready for Vercel deployment (Next.js 16)
-- Set `DATABASE_URL` environment variable for production
-- Upgrade from SQLite to PostgreSQL for production use
-- No environment-specific config files exist (relies on Next.js defaults)
+- Currently deployed on Railway (Next.js 16)
+- PostgreSQL database hosted on Railway
+- Required environment variables:
+  - `DATABASE_URL` - PostgreSQL connection string
+  - `STEAM_API_KEY` - Steam Web API key (get from steamcommunity.com/dev/apikey)
+  - `NEXTAUTH_SECRET` - Random secret for NextAuth (generate with `openssl rand -base64 32`)
+  - `NEXTAUTH_URL` - Full URL of the application
+- See `STEAM_OAUTH_SETUP.md` for detailed Steam OAuth configuration
+- Railway CLI: Use `railway run` to execute commands with production env vars

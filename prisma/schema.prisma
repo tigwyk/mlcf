@@ -11,12 +11,54 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id            String    @id @default(cuid())
+  steamId       String    @unique
+  username      String
+  avatar        String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  accounts      Account[]
+  sessions      Session[]
+  builds        Build[]
+  guides        Guide[]
+  comments      Comment[]
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Build {
   id          String   @id @default(cuid())
   name        String
   description String?
   exportString String  // The Q-Up skill export string
-  author      String
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   upvotes     Int      @default(0)
   downvotes   Int      @default(0)
   views       Int      @default(0)
@@ -30,7 +72,8 @@ model Guide {
   id          String   @id @default(cuid())
   title       String
   content     String   // Markdown content
-  author      String
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   summary     String?
   upvotes     Int      @default(0)
   downvotes   Int      @default(0)
@@ -51,7 +94,8 @@ model Tag {
 model Comment {
   id        String   @id @default(cuid())
   content   String
-  author    String
+  authorId  String
+  author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   buildId   String?
   guideId   String?
   build     Build?   @relation(fields: [buildId], references: [id], onDelete: Cascade)
