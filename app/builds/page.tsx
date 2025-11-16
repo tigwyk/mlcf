@@ -10,7 +10,7 @@ interface Build {
   name: string;
   description: string | null;
   exportString: string;
-  author: {
+  author?: {
     id: string;
     username: string;
     avatar: string | null;
@@ -132,7 +132,7 @@ export default function BuildsPage() {
                   <div>
                     <h3 className="text-xl font-bold mb-1">{build.name}</h3>
                     <p className="text-sm text-gray-400">
-                      by {build.author.username} • <span className="text-purple-400">{getCharacterName(build.exportString)}</span>
+                      by {build.author?.username || 'Anonymous'} • <span className="text-purple-400">{getCharacterName(build.exportString)}</span>
                     </p>
                   </div>
                   <div className="flex gap-4 text-sm">
