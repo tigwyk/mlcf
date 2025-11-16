@@ -1,4 +1,6 @@
-import { prisma } from '../lib/prisma';
+import { PrismaClient } from '../app/generated/prisma/client';
+
+const prisma = new PrismaClient();
 
 async function fixDuplicateUsernames() {
   const users = await prisma.user.findMany();
@@ -6,6 +8,7 @@ async function fixDuplicateUsernames() {
   console.log(`Found ${users.length} users`);
   
   for (const user of users) {
+    console.log(`Checking user: ${user.username}`);
     if (user.username.includes(' ')) {
       const words = user.username.split(' ');
       // Check if consecutive words are the same (e.g., "Tigwyk Tigwyk" -> ["Tigwyk", "Tigwyk"])
@@ -24,6 +27,7 @@ async function fixDuplicateUsernames() {
   }
   
   console.log('Done!');
+  await prisma.$disconnect();
 }
 
 fixDuplicateUsernames()
