@@ -32,13 +32,25 @@ interface Build {
 export default function BuildDetailPage() {
   const params = useParams();
   const [build, setBuild] = useState<Build | null>(null);
+  const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [showExportString, setShowExportString] = useState(false);
 
   useEffect(() => {
     fetchBuild();
+    fetchUser();
   }, [params.id]);
+
+  const fetchUser = async () => {
+    try {
+      const response = await fetch('/api/auth/steam/session');
+      const data = await response.json();
+      setUser(data.user);
+    } catch (err) {
+      // User not logged in, that's okay
+    }
+  };
 
   const fetchBuild = async () => {
     try {
@@ -121,9 +133,19 @@ export default function BuildDetailPage() {
       
       <div className="bg-gradient-to-r from-blue-900 to-purple-900 py-8 px-4">
         <div className="max-w-5xl mx-auto">
-          <Link href="/builds" className="text-blue-300 hover:text-blue-200 mb-4 inline-block">
-            ← Back to Builds
-          </Link>
+          <div className="flex justify-between items-start mb-4">
+            <Link href="/builds" className="text-blue-300 hover:text-blue-200">
+              ← Back to Builds
+            </Link>
+            {user && build.author?.id === user.id && (
+              <Link
+                href={`/builds/${build.id}/edit`}
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm transition-colors"
+              >
+                Edit Build
+              </Link>
+            )}
+          </div>
           <h1 className="text-4xl font-bold mb-2">{build.name}</h1>
           <p className="text-gray-300">by {build.author?.username || 'Anonymous'}</p>
         </div>
