@@ -1,6 +1,3 @@
-[build]
-builder = "metal"
-
 [deploy]
 startCommand = "npm start"
 restartPolicyType = "on_failure"
