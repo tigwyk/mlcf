@@ -4,6 +4,7 @@ import { prisma } from "./prisma";
 import SteamProvider from "./steam-provider";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  trustHost: true,
   adapter: PrismaAdapter(prisma) as any,
   providers: [
     SteamProvider({
