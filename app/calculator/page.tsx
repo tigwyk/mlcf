@@ -337,11 +337,11 @@ export default function Calculator() {
         <div className="mt-8 bg-gray-800 rounded-lg p-6 border border-gray-700">
           <h3 className="text-lg font-bold mb-3">Tips</h3>
           <ul className="space-y-2 text-sm text-gray-400">
-            <li>• <strong>Round Skills</strong> can be placed anywhere on the grid</li>
-            <li>• <strong>Hex Skills</strong> unlock at specific levels and have fixed positions</li>
-            <li>• Click a placed skill to remove it from the grid</li>
-            <li>• Skills execute in grid position order during coinflips</li>
-            <li>• Chain reactions occur when skills trigger adjacent skills</li>
+            <li>• <strong>Hex Skills</strong> are permanently placed on the grid - they unlock (light up) as you level up</li>
+            <li>• <strong>Round Skills</strong> can be freely placed anywhere on the grid to create combos</li>
+            <li>• Click a placed round skill to remove it from the grid</li>
+            <li>• Skills execute in sequential order (1, 2, 3...) during coinflips</li>
+            <li>• Chain reactions occur when skills trigger adjacent skills on the grid</li>
             <li>• Use Import/Export to share builds or save them to submit to the Builds section</li>
           </ul>
         </div>

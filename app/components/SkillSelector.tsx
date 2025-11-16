@@ -33,7 +33,9 @@ export default function SkillSelector({
   
   const availableSkills = getSkillsByLevel(characterLevel);
   
+  // Filter out hex skills (they're auto-placed on grid)
   const filteredSkills = availableSkills.filter(skill => {
+    if (skill.type === 'hex') return false; // Hex skills are fixed on grid
     if (filter !== 'all' && skill.type !== filter) return false;
     if (triggerFilter !== 'all' && skill.trigger !== triggerFilter) return false;
     return true;
@@ -44,7 +46,7 @@ export default function SkillSelector({
       <div className="mb-4">
         <h3 className="text-lg font-bold mb-2">Available Skills</h3>
         <p className="text-sm text-gray-400 mb-4">
-          Level {characterLevel} - {availableSkills.length} skills unlocked
+          Level {characterLevel} - {availableSkills.filter(s => s.type === 'round').length} round skills unlocked
         </p>
         
         {/* Filters */}
