@@ -4,7 +4,8 @@ import { cookies } from "next/headers";
 import { sessionOptions, SessionData } from "@/lib/session";
 
 export async function GET() {
-  const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+  const cookieStore = await cookies();
+  const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
   session.destroy();
 
   const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";

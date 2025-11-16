@@ -81,7 +81,8 @@ export async function GET(request: NextRequest) {
     });
 
     // Create session
-    const session = await getIronSession<SessionData>(cookies(), sessionOptions);
+    const cookieStore = await cookies();
+    const session = await getIronSession<SessionData>(cookieStore, sessionOptions);
     session.user = {
       id: user.id,
       steamId: user.steamId,
