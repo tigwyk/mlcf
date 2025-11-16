@@ -56,7 +56,6 @@ export default function SubmitBuild() {
           name: formData.name,
           description: formData.description,
           exportString: formData.exportString,
-          author: user?.username || 'Anonymous',
           tags,
         }),
       });

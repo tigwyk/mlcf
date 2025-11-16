@@ -63,9 +63,24 @@ export default function BuildDetailPage() {
 
   // Parse skills for visualization
   const parsedSkills = build ? parseSkillExport(build.exportString) : null;
+  
+  // Debug logging
+  useEffect(() => {
+    if (parsedSkills) {
+      console.log('Parsed skills:', parsedSkills);
+      if (parsedSkills.isValid && parsedSkills.skills.length > 0) {
+        console.log('Sample skill GUID from export:', parsedSkills.skills[0].guid);
+        console.log('Sample skill name from export:', parsedSkills.skills[0].name);
+      }
+    }
+  }, [parsedSkills]);
+  
   const placedSkills = parsedSkills?.isValid
     ? parsedSkills.skills.map((skill) => {
         const skillDef = getSkillByGuid(skill.guid);
+        if (!skillDef) {
+          console.log('No skill definition found for GUID:', skill.guid, 'Name:', skill.name);
+        }
         return skillDef
           ? {
               skill: skillDef,

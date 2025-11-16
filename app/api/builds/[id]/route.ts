@@ -11,6 +11,13 @@ export async function GET(
       where: { id },
       include: {
         tags: true,
+        author: {
+          select: {
+            id: true,
+            username: true,
+            avatar: true,
+          },
+        },
         comments: {
           orderBy: { createdAt: 'desc' },
         },
