@@ -14,6 +14,11 @@ interface Comment {
   };
 }
 
+interface EditingState {
+  commentId: string;
+  content: string;
+}
+
 interface CommentSectionProps {
   resourceType: 'build' | 'guide';
   resourceId: string;
@@ -26,6 +31,7 @@ export default function CommentSection({ resourceType, resourceId, user }: Comme
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
+  const [editing, setEditing] = useState<EditingState | null>(null);
 
   useEffect(() => {
     fetchComments();
@@ -72,6 +78,63 @@ export default function CommentSection({ resourceType, resourceId, user }: Comme
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleDelete = async (commentId: string) => {
+    if (!confirm('Are you sure you want to delete this comment?')) return;
+
+    try {
+      const response = await fetch(`/api/${resourceType}s/${resourceId}/comments/${commentId}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        setComments(comments.filter(c => c.id !== commentId));
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to delete comment');
+      }
+    } catch (err) {
+      alert('Failed to delete comment');
+    }
+  };
+
+  const handleEdit = (comment: Comment) => {
+    setEditing({ commentId: comment.id, content: comment.content });
+  };
+
+  const handleCancelEdit = () => {
+    setEditing(null);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editing || !editing.content.trim()) return;
+
+    try {
+      const response = await fetch(`/api/${resourceType}s/${resourceId}/comments/${editing.commentId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ content: editing.content }),
+      });
+
+      if (response.ok) {
+        const updatedComment = await response.json();
+        setComments(comments.map(c => c.id === updatedComment.id ? updatedComment : c));
+        setEditing(null);
+      } else {
+        const data = await response.json();
+        alert(data.error || 'Failed to update comment');
+      }
+    } catch (err) {
+      alert('Failed to update comment');
+    }
+  };
+
+  const canEditComment = (comment: Comment) => {
+    if (!user || comment.author.id !== user.id) return false;
+    const commentAge = Date.now() - new Date(comment.createdAt).getTime();
+    const fifteenMinutes = 15 * 60 * 1000;
+    return commentAge <= fifteenMinutes;
   };
 
   return (
@@ -138,13 +201,58 @@ export default function CommentSection({ resourceType, resourceId, user }: Comme
                   </div>
                 )}
                 <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="font-bold text-purple-300">{comment.author.username}</span>
-                    <span className="text-sm text-gray-500">
-                      {new Date(comment.createdAt).toLocaleDateString()}
-                    </span>
+                  <div className="flex items-center justify-between mb-1">
+                    <div className="flex items-center gap-2">
+                      <span className="font-bold text-purple-300">{comment.author.username}</span>
+                      <span className="text-sm text-gray-500">
+                        {new Date(comment.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                    {user && comment.author.id === user.id && (
+                      <div className="flex gap-2">
+                        {canEditComment(comment) && editing?.commentId !== comment.id && (
+                          <button
+                            onClick={() => handleEdit(comment)}
+                            className="text-sm text-blue-400 hover:text-blue-300"
+                          >
+                            Edit
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDelete(comment.id)}
+                          className="text-sm text-red-400 hover:text-red-300"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <p className="text-gray-300 whitespace-pre-wrap">{comment.content}</p>
+                  {editing?.commentId === comment.id ? (
+                    <div>
+                      <textarea
+                        value={editing.content}
+                        onChange={(e) => setEditing({ ...editing, content: e.target.value })}
+                        className="w-full bg-gray-800 border border-gray-600 rounded px-3 py-2 text-gray-100 focus:outline-none focus:border-purple-500 resize-none"
+                        rows={3}
+                      />
+                      <div className="flex gap-2 mt-2">
+                        <button
+                          onClick={handleSaveEdit}
+                          className="bg-purple-600 hover:bg-purple-700 text-white text-sm font-bold py-1 px-4 rounded transition-colors"
+                        >
+                          Save
+                        </button>
+                        <button
+                          onClick={handleCancelEdit}
+                          className="bg-gray-700 hover:bg-gray-600 text-white text-sm font-bold py-1 px-4 rounded transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="text-gray-300 whitespace-pre-wrap">{comment.content}</p>
+                  )}
                 </div>
               </div>
             </div>
