@@ -40,6 +40,7 @@ interface QUpLoadout {
 }
 
 const CHARACTER_NAMES: Record<number, string> = {
+  0: 'The Gambler',
   1: 'Leila the Medic',
   // Add other characters as discovered
 };

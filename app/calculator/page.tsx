@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useState, useCallback, Suspense } from 'react';
 import Navigation from '@/app/components/Navigation';
 import SkillGrid from '@/app/components/SkillGrid';
 import SkillSelector from '@/app/components/SkillSelector';
 import BuildBrowser from '@/app/components/BuildBrowser';
+import CalculatorImport from './CalculatorImport';
 import { SkillDefinition, getSkillByGuid } from '@/lib/skillData';
 import { parseSkillExport } from '@/lib/skillParser';
 
@@ -20,8 +20,14 @@ interface PlacedSkill {
   position: GridPosition;
 }
 
+const CHARACTERS = [
+  { id: 0, name: 'The Gambler' },
+  { id: 1, name: 'Leila the Medic' },
+  // Add more characters as they are discovered
+];
+
 export default function Calculator() {
-  const searchParams = useSearchParams();
+  const [character, setCharacter] = useState(0);
   const [characterLevel, setCharacterLevel] = useState(50);
   const [selectedSkill, setSelectedSkill] = useState<SkillDefinition | null>(null);
   const [placedSkills, setPlacedSkills] = useState<PlacedSkill[]>([]);
@@ -32,29 +38,14 @@ export default function Calculator() {
   const [importedBuildName, setImportedBuildName] = useState<string | null>(null);
 
   // Handle URL import parameter
-  useEffect(() => {
-    const importParam = searchParams?.get('import');
-    if (importParam) {
-      setImportString(importParam);
-      setShowImportExport(true);
-      // Auto-import the build
-      const parsed = parseSkillExport(importParam);
-      if (parsed.isValid) {
-        const imported: PlacedSkill[] = [];
-        for (const skill of parsed.skills) {
-          const skillDef = getSkillByGuid(skill.guid);
-          if (skillDef) {
-            imported.push({
-              skill: skillDef,
-              position: skill.gridPosition,
-            });
-          }
-        }
-        setPlacedSkills(imported);
-        setImportedBuildName('Imported Build');
-      }
+  const handleUrlImport = useCallback((skills: PlacedSkill[], buildName: string, characterId?: number) => {
+    setPlacedSkills(skills);
+    setImportedBuildName(buildName);
+    if (characterId) {
+      setCharacter(characterId);
     }
-  }, [searchParams]);
+    setShowImportExport(true);
+  }, []);
   
   const handlePlaceSkill = (skill: SkillDefinition, position: GridPosition) => {
     setPlacedSkills([...placedSkills, { skill, position }]);
@@ -70,7 +61,7 @@ export default function Calculator() {
   const handleExport = () => {
     // Create loadout object
     const loadout = {
-      character: 1, // Default to Leila the Medic
+      character: character,
       nodes: placedSkills.map(ps => ({
         name: ps.skill.name,
         guid: ps.skill.guid,
@@ -112,7 +103,7 @@ export default function Calculator() {
     setPlacedSkills(imported);
     setImportedBuildName(buildName || null);
     if (parsed.character) {
-      // You could infer character level from the build, for now keep current
+      setCharacter(parsed.character);
     }
     setImportString('');
     setShowImportExport(false);
@@ -138,6 +129,9 @@ export default function Calculator() {
       }
       setPlacedSkills(imported);
       setImportedBuildName(buildName);
+      if (parsed.character) {
+        setCharacter(parsed.character);
+      }
       alert(`Successfully imported "${buildName}" with ${imported.length} skills!`);
     }
   };
@@ -160,6 +154,9 @@ export default function Calculator() {
   
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100">
+      <Suspense fallback={null}>
+        <CalculatorImport onImport={handleUrlImport} />
+      </Suspense>
       <Navigation />
       
       <div className="max-w-7xl mx-auto px-4 py-8">
@@ -178,6 +175,18 @@ export default function Calculator() {
         {/* Controls */}
         <div className="bg-gray-800 rounded-lg p-4 border border-gray-700 mb-6">
           <div className="flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <label className="text-sm font-semibold">Character:</label>
+              <select
+                value={character}
+                onChange={(e) => setCharacter(parseInt(e.target.value))}
+                className="bg-gray-700 border border-gray-600 rounded px-3 py-1"
+              >
+                {CHARACTERS.map(char => (
+                  <option key={char.id} value={char.id}>{char.name}</option>
+                ))}
+              </select>
+            </div>
             <div className="flex items-center gap-2">
               <label className="text-sm font-semibold">Character Level:</label>
               <input
