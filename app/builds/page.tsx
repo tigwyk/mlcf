@@ -3,11 +3,13 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Navigation from '@/app/components/Navigation';
+import { parseSkillExport } from '@/lib/skillParser';
 
 interface Build {
   id: string;
   name: string;
   description: string | null;
+  exportString: string;
   author: string;
   upvotes: number;
   downvotes: number;
@@ -51,6 +53,11 @@ export default function BuildsPage() {
     const total = upvotes + downvotes;
     if (total === 0) return 'N/A';
     return `${Math.round((upvotes / total) * 100)}%`;
+  };
+
+  const getCharacterName = (exportString: string) => {
+    const parsed = parseSkillExport(exportString);
+    return parsed.characterName || 'Unknown';
   };
 
   return (
@@ -120,7 +127,9 @@ export default function BuildsPage() {
                 <div className="flex justify-between items-start mb-3">
                   <div>
                     <h3 className="text-xl font-bold mb-1">{build.name}</h3>
-                    <p className="text-sm text-gray-400">by {build.author}</p>
+                    <p className="text-sm text-gray-400">
+                      by {build.author} • <span className="text-purple-400">{getCharacterName(build.exportString)}</span>
+                    </p>
                   </div>
                   <div className="flex gap-4 text-sm">
                     <div className="text-center">
