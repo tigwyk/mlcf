@@ -10,24 +10,23 @@ export interface SteamProfile {
 export default function SteamProvider(
   options: OAuthUserConfig<SteamProfile>
 ): OAuthConfig<SteamProfile> {
+  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000";
+  const callbackUrl = `${baseUrl}/api/auth/callback/steam`;
+  
   return {
     id: "steam",
     name: "Steam",
-    type: "oauth",
+    type: "oidc",
     issuer: "https://steamcommunity.com",
-    wellKnown: undefined,
     authorization: {
       url: "https://steamcommunity.com/openid/login",
-      params(context: any) {
-        const returnUrl = context.callbackUrl || `${process.env.NEXTAUTH_URL}/api/auth/callback/steam`;
-        return {
-          "openid.mode": "checkid_setup",
-          "openid.ns": "http://specs.openid.net/auth/2.0",
-          "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
-          "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
-          "openid.return_to": returnUrl,
-          "openid.realm": process.env.NEXTAUTH_URL || "http://localhost:3000",
-        };
+      params: {
+        "openid.mode": "checkid_setup",
+        "openid.ns": "http://specs.openid.net/auth/2.0",
+        "openid.identity": "http://specs.openid.net/auth/2.0/identifier_select",
+        "openid.claimed_id": "http://specs.openid.net/auth/2.0/identifier_select",
+        "openid.return_to": callbackUrl,
+        "openid.realm": baseUrl,
       },
     },
     token: {
