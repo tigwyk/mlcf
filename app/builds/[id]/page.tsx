@@ -195,6 +195,12 @@ export default function BuildDetailPage() {
             Use the export string to share this build or import it into the game.
           </p>
           <div className="flex gap-3 flex-wrap">
+            <CopyButton 
+              textToCopy={typeof window !== 'undefined' ? window.location.href : ''} 
+              label="Share Build"
+              successMessage="Link Copied!"
+              className="bg-purple-600 hover:bg-purple-700"
+            />
             <CopyButton textToCopy={build.exportString} />
             <Link
               href={`/calculator?import=${encodeURIComponent(build.exportString)}`}
