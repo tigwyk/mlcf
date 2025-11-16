@@ -7,6 +7,7 @@ import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import Navigation from '@/app/components/Navigation';
 import BuildEmbed from '@/app/components/BuildEmbed';
+import CommentSection from '@/app/components/CommentSection';
 
 export const dynamic = 'force-dynamic';
 
@@ -220,32 +221,8 @@ export default function GuideDetailPage() {
         </article>
 
         {/* Comments Section */}
-        <div className="mt-12 bg-gray-800 border border-gray-700 rounded-lg p-6">
-          <h2 className="text-xl font-bold mb-4">
-            Comments ({guide.comments.length})
-          </h2>
-          {guide.comments.length === 0 ? (
-            <p className="text-gray-400 text-center py-4">
-              No comments yet. Be the first to share your thoughts!
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {guide.comments.map((comment) => (
-                <div
-                  key={comment.id}
-                  className="bg-gray-700 rounded-lg p-4 border border-gray-600"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="font-semibold text-purple-300">{comment.author}</span>
-                    <span className="text-sm text-gray-400">
-                      {new Date(comment.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-gray-200">{comment.content}</p>
-                </div>
-              ))}
-            </div>
-          )}
+        <div className="mt-12">
+          <CommentSection resourceType="guide" resourceId={guide.id} user={user} />
         </div>
 
         {/* Metadata */}

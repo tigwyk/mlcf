@@ -8,6 +8,7 @@ import Link from 'next/link';
 import Navigation from '@/app/components/Navigation';
 import BuildSkillGrid from '@/app/components/BuildSkillGrid';
 import CopyButton from '@/app/components/CopyButton';
+import CommentSection from '@/app/components/CommentSection';
 import { parseSkillExport } from '@/lib/skillParser';
 import { getSkillByGuid } from '@/lib/skillData';
 
@@ -275,33 +276,7 @@ export default function BuildDetailPage() {
         </div>
 
         {/* Comments Section */}
-        <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
-          <h2 className="text-xl font-bold mb-4">
-            Comments ({build.comments.length})
-          </h2>
-          {build.comments.length === 0 ? (
-            <p className="text-gray-400 text-center py-4">
-              No comments yet. Be the first to share your thoughts!
-            </p>
-          ) : (
-            <div className="space-y-4">
-              {build.comments.map((comment) => (
-                <div
-                  key={comment.id}
-                  className="bg-gray-700 rounded-lg p-4 border border-gray-600"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <span className="font-semibold text-blue-300">{comment.author}</span>
-                    <span className="text-sm text-gray-400">
-                      {new Date(comment.createdAt).toLocaleDateString()}
-                    </span>
-                  </div>
-                  <p className="text-gray-200">{comment.content}</p>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        <CommentSection resourceType="build" resourceId={build.id} user={user} />
 
         {/* Metadata */}
         <div className="mt-6 text-center text-sm text-gray-400">
