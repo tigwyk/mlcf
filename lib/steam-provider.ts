@@ -14,6 +14,7 @@ export default function SteamProvider(
     id: "steam",
     name: "Steam",
     type: "oauth",
+    issuer: "https://steamcommunity.com",
     wellKnown: undefined,
     authorization: {
       url: "https://steamcommunity.com/openid/login",
