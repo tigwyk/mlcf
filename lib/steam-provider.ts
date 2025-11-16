@@ -26,6 +26,7 @@ export default function SteamProvider(
       },
     },
     token: {
+      url: "https://steamcommunity.com/openid/login",
       async request(context: any) {
         // Steam OpenID 2.0 doesn't use tokens, extract steamid from return URL
         const params = context.params;
