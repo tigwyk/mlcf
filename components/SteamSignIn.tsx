@@ -1,31 +1,55 @@
 "use client";
 
-import { signIn, signOut, useSession } from "next-auth/react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
+interface User {
+  id: string;
+  steamId: string;
+  username: string;
+  avatar: string | null;
+}
 
 export default function SteamSignIn() {
-  const { data: session, status } = useSession();
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-  if (status === "loading") {
+  useEffect(() => {
+    fetch("/api/auth/steam/session")
+      .then((res) => res.json())
+      .then((data) => {
+        setUser(data.user);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const handleSignOut = () => {
+    window.location.href = "/api/auth/steam/logout";
+  };
+
+  if (loading) {
     return <div>Loading...</div>;
   }
 
-  if (session) {
+  if (user) {
     return (
       <div className="flex items-center gap-4">
         <div className="flex items-center gap-2">
-          {session.user.image && (
+          {user.avatar && (
             <img
-              src={session.user.image}
-              alt={session.user.username || "User"}
+              src={user.avatar}
+              alt={user.username}
               className="w-8 h-8 rounded-full"
             />
           )}
           <span className="text-sm font-medium">
-            {session.user.username || session.user.name}
+            {user.username}
           </span>
         </div>
         <button
-          onClick={() => signOut()}
+          onClick={handleSignOut}
           className="px-4 py-2 text-sm bg-red-600 text-white rounded hover:bg-red-700 transition"
         >
           Sign Out
@@ -35,8 +59,8 @@ export default function SteamSignIn() {
   }
 
   return (
-    <button
-      onClick={() => signIn("steam")}
+    <a
+      href="/api/auth/steam/login"
       className="inline-flex items-center gap-2 px-5 py-2.5 bg-black text-white font-bold rounded border border-gray-600 hover:bg-gray-800 transition-colors"
     >
       <img
@@ -45,6 +69,6 @@ export default function SteamSignIn() {
         className="w-5 h-5"
       />
       Sign in with Steam
-    </button>
+    </a>
   );
 }
