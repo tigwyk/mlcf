@@ -69,12 +69,17 @@ export async function GET(request: NextRequest) {
 
     // Clean up username - remove consecutive duplicate words
     let username = player.personaname;
-    console.log('[Steam Callback] Original personaname from Steam:', username);
+    console.log('[Steam Callback] Original personaname from Steam:', JSON.stringify(username));
+    console.log('[Steam Callback] Username length:', username.length);
+    console.log('[Steam Callback] Username char codes:', [...username].map(c => c.charCodeAt(0)));
+    
     if (username.includes(' ')) {
       const words = username.split(' ');
+      console.log('[Steam Callback] Split into words:', words);
       const uniqueWords = words.filter((word: string, i: number) => i === 0 || word !== words[i-1]);
+      console.log('[Steam Callback] After dedup:', uniqueWords);
       username = uniqueWords.join(' ');
-      console.log('[Steam Callback] Cleaned username:', username);
+      console.log('[Steam Callback] Final username:', JSON.stringify(username));
     }
 
     // Create or update user in database
