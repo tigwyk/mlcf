@@ -146,14 +146,22 @@ export default function BuildDetailPage() {
               {build.exportString}
             </code>
           </div>
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(build.exportString);
-            }}
-            className="mt-3 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm transition-colors"
-          >
-            Copy to Clipboard
-          </button>
+          <div className="mt-3 flex gap-3">
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(build.exportString);
+              }}
+              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm transition-colors"
+            >
+              Copy to Clipboard
+            </button>
+            <Link
+              href={`/calculator?import=${encodeURIComponent(build.exportString)}`}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm transition-colors inline-block"
+            >
+              Open in Calculator
+            </Link>
+          </div>
         </div>
 
         {/* Comments Section */}

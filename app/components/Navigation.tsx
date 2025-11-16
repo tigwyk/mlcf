@@ -9,6 +9,9 @@ export default function Navigation() {
             <span className="text-blue-400">MLCF</span>
           </Link>
           <div className="flex gap-6">
+            <Link href="/calculator" className="hover:text-green-400 transition-colors">
+              Calculator
+            </Link>
             <Link href="/builds" className="hover:text-blue-400 transition-colors">
               Builds
             </Link>

@@ -25,6 +25,12 @@ export default function Home() {
           </p>
           <div className="flex gap-4 justify-center">
             <Link
+              href="/calculator"
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
+            >
+              Skill Calculator
+            </Link>
+            <Link
               href="/builds"
               className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-lg transition-colors"
             >
@@ -44,6 +50,14 @@ export default function Home() {
       <div className="max-w-7xl mx-auto px-4 py-16">
         <div className="grid md:grid-cols-3 gap-8">
           <div className="bg-gray-800 p-8 rounded-lg border border-gray-700">
+            <div className="text-4xl mb-4">🧮</div>
+            <h3 className="text-xl font-bold mb-3">Skill Calculator</h3>
+            <p className="text-gray-400">
+              Build your perfect loadout with our interactive hexagonal grid calculator.
+              Place skills, plan combos, and export your build to share with the community.
+            </p>
+          </div>
+          <div className="bg-gray-800 p-8 rounded-lg border border-gray-700">
             <div className="text-4xl mb-4">🪙</div>
             <h3 className="text-xl font-bold mb-3">Pro Builds</h3>
             <p className="text-gray-400">
@@ -57,14 +71,6 @@ export default function Home() {
             <p className="text-gray-400">
               Deep-dive articles covering advanced tactics, psychology, and game theory
               for competitive coin flipping. Written by the community, for the community.
-            </p>
-          </div>
-          <div className="bg-gray-800 p-8 rounded-lg border border-gray-700">
-            <div className="text-4xl mb-4">🏆</div>
-            <h3 className="text-xl font-bold mb-3">Community Driven</h3>
-            <p className="text-gray-400">
-              Vote on the best builds, discuss strategies, and help shape the Q-Up
-              competitive meta. The edge is in the details.
             </p>
           </div>
         </div>
