@@ -67,16 +67,24 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${baseUrl}/?error=steam_api_failed`);
     }
 
+    // Clean up username - remove consecutive duplicate words
+    let username = player.personaname;
+    if (username.includes(' ')) {
+      const words = username.split(' ');
+      const uniqueWords = words.filter((word: string, i: number) => i === 0 || word !== words[i-1]);
+      username = uniqueWords.join(' ');
+    }
+
     // Create or update user in database
     const user = await prisma.user.upsert({
       where: { steamId },
       create: {
         steamId,
-        username: player.personaname,
+        username,
         avatar: player.avatarfull,
       },
       update: {
-        username: player.personaname,
+        username,
         avatar: player.avatarfull,
       },
     });
