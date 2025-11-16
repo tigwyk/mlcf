@@ -16,7 +16,11 @@ interface Build {
   name: string;
   description: string | null;
   exportString: string;
-  author: string;
+  author: {
+    id: string;
+    username: string;
+    avatar: string | null;
+  };
   upvotes: number;
   downvotes: number;
   views: number;
@@ -106,7 +110,7 @@ export default function BuildDetailPage() {
             ← Back to Builds
           </Link>
           <h1 className="text-4xl font-bold mb-2">{build.name}</h1>
-          <p className="text-gray-300">by {build.author}</p>
+          <p className="text-gray-300">by {build.author.username}</p>
         </div>
       </div>
 
