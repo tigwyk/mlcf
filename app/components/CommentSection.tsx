@@ -6,6 +6,7 @@ import Image from 'next/image';
 interface Comment {
   id: string;
   content: string;
+  rating: number | null;
   createdAt: string;
   author: {
     id: string;
@@ -28,6 +29,8 @@ interface CommentSectionProps {
 export default function CommentSection({ resourceType, resourceId, user }: CommentSectionProps) {
   const [comments, setComments] = useState<Comment[]>([]);
   const [newComment, setNewComment] = useState('');
+  const [rating, setRating] = useState<number | null>(null);
+  const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
@@ -62,13 +65,14 @@ export default function CommentSection({ resourceType, resourceId, user }: Comme
       const response = await fetch(`/api/${resourceType}s/${resourceId}/comments`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ content: newComment }),
+        body: JSON.stringify({ content: newComment, rating }),
       });
 
       if (response.ok) {
         const comment = await response.json();
         setComments([comment, ...comments]);
         setNewComment('');
+        setRating(null);
       } else {
         const data = await response.json();
         setError(data.error || 'Failed to post comment');
@@ -137,12 +141,53 @@ export default function CommentSection({ resourceType, resourceId, user }: Comme
     return commentAge <= fifteenMinutes;
   };
 
+  const renderStars = (currentRating: number | null, interactive: boolean = false) => {
+    return (
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((star) => {
+          const displayRating = interactive ? (hoverRating || rating) : currentRating;
+          const isFilled = displayRating !== null && star <= displayRating;
+          
+          return interactive ? (
+            <button
+              key={star}
+              type="button"
+              onClick={() => setRating(star)}
+              onMouseEnter={() => setHoverRating(star)}
+              onMouseLeave={() => setHoverRating(null)}
+              className="text-2xl transition-colors hover:scale-110"
+            >
+              {isFilled ? '★' : '☆'}
+            </button>
+          ) : (
+            <span key={star} className="text-yellow-400">
+              {isFilled ? '★' : '☆'}
+            </span>
+          );
+        })}
+      </div>
+    );
+  };
+
   return (
     <div className="bg-gray-800 border border-gray-700 rounded-lg p-6">
       <h3 className="text-2xl font-bold mb-6">Comments ({comments.length})</h3>
 
       {user ? (
         <form onSubmit={handleSubmit} className="mb-8">
+          <div className="mb-3">
+            <label className="block text-sm font-medium mb-2">Rate this {resourceType} (optional)</label>
+            {renderStars(rating, true)}
+            {rating && (
+              <button
+                type="button"
+                onClick={() => setRating(null)}
+                className="text-sm text-gray-400 hover:text-gray-300 mt-1"
+              >
+                Clear rating
+              </button>
+            )}
+          </div>
           <textarea
             value={newComment}
             onChange={(e) => setNewComment(e.target.value)}
@@ -209,6 +254,11 @@ export default function CommentSection({ resourceType, resourceId, user }: Comme
                       <span className="text-sm text-gray-500">
                         {new Date(comment.createdAt).toLocaleDateString()}
                       </span>
+                      {comment.rating && (
+                        <div className="flex items-center gap-1">
+                          {renderStars(comment.rating, false)}
+                        </div>
+                      )}
                     </div>
                     {user && comment.author.id === user.id && (
                       <div className="flex gap-2">
