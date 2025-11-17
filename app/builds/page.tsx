@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Navigation from '@/app/components/Navigation';
+import StarRating from '@/app/components/StarRating';
 import { parseSkillExport } from '@/lib/skillParser';
 
 interface Build {
@@ -18,6 +19,8 @@ interface Build {
   upvotes: number;
   downvotes: number;
   views: number;
+  averageRating: number | null;
+  ratingCount: number;
   createdAt: string;
   tags: { id: string; name: string }[];
   _count: { comments: number };
@@ -129,11 +132,16 @@ export default function BuildsPage() {
                 className="block bg-gray-800 border border-gray-700 rounded-lg p-6 hover:border-gray-600 transition-colors cursor-pointer"
               >
                 <div className="flex justify-between items-start mb-3">
-                  <div>
+                  <div className="flex-1">
                     <h3 className="text-xl font-bold mb-1">{build.name}</h3>
-                    <p className="text-sm text-gray-400">
-                      by {build.author?.username || 'Anonymous'} • <span className="text-purple-400">{getCharacterName(build.exportString)}</span>
-                    </p>
+                    <div className="flex items-center gap-3 flex-wrap">
+                      <p className="text-sm text-gray-400">
+                        by {build.author?.username || 'Anonymous'} • <span className="text-purple-400">{getCharacterName(build.exportString)}</span>
+                      </p>
+                      {build.averageRating && build.ratingCount > 0 && (
+                        <StarRating rating={build.averageRating} size="sm" />
+                      )}
+                    </div>
                   </div>
                   <div className="flex gap-4 text-sm">
                     <div className="text-center">

@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Navigation from '@/app/components/Navigation';
+import StarRating from '@/app/components/StarRating';
 
 interface Guide {
   id: string;
@@ -16,6 +17,8 @@ interface Guide {
   upvotes: number;
   downvotes: number;
   views: number;
+  averageRating: number | null;
+  ratingCount: number;
   createdAt: string;
   tags: { id: string; name: string }[];
   _count: { comments: number };
@@ -121,9 +124,14 @@ export default function GuidesPage() {
                         {guide.title}
                       </h2>
                     </Link>
-                    <p className="text-sm text-gray-400 mb-3">
-                      by {guide.author?.username || 'Anonymous'} • {new Date(guide.createdAt).toLocaleDateString()}
-                    </p>
+                    <div className="flex items-center gap-3 flex-wrap mb-3">
+                      <p className="text-sm text-gray-400">
+                        by {guide.author?.username || 'Anonymous'} • {new Date(guide.createdAt).toLocaleDateString()}
+                      </p>
+                      {guide.averageRating && guide.ratingCount > 0 && (
+                        <StarRating rating={guide.averageRating} size="sm" />
+                      )}
+                    </div>
                     {guide.summary && (
                       <p className="text-gray-300 mb-4">{guide.summary}</p>
                     )}

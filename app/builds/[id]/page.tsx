@@ -9,6 +9,7 @@ import Navigation from '@/app/components/Navigation';
 import BuildSkillGrid from '@/app/components/BuildSkillGrid';
 import CopyButton from '@/app/components/CopyButton';
 import CommentSection from '@/app/components/CommentSection';
+import StarRating from '@/app/components/StarRating';
 import { parseSkillExport } from '@/lib/skillParser';
 import { getSkillByGuid } from '@/lib/skillData';
 
@@ -25,6 +26,8 @@ interface Build {
   upvotes: number;
   downvotes: number;
   views: number;
+  averageRating: number | null;
+  ratingCount: number;
   createdAt: string;
   tags: { id: string; name: string }[];
   comments: { id: string; content: string; author: string; createdAt: string }[];
@@ -148,7 +151,15 @@ export default function BuildDetailPage() {
             )}
           </div>
           <h1 className="text-4xl font-bold mb-2">{build.name}</h1>
-          <p className="text-gray-300">by {build.author?.username || 'Anonymous'}</p>
+          <div className="flex items-center gap-4">
+            <p className="text-gray-300">by {build.author?.username || 'Anonymous'}</p>
+            {build.averageRating && build.ratingCount > 0 && (
+              <div className="flex items-center gap-2">
+                <StarRating rating={build.averageRating} size="md" />
+                <span className="text-sm text-gray-400">({build.ratingCount} {build.ratingCount === 1 ? 'rating' : 'ratings'})</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
