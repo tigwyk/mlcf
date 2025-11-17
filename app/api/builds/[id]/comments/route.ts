@@ -49,7 +49,7 @@ export async function POST(
     }
 
     const { id } = await context.params;
-    const { content, rating } = await request.json();
+    const { content } = await request.json();
 
     if (!content || content.trim().length === 0) {
       return NextResponse.json(
@@ -58,20 +58,9 @@ export async function POST(
       );
     }
 
-    // Validate rating if provided
-    if (rating !== undefined && rating !== null) {
-      if (!Number.isInteger(rating) || rating < 1 || rating > 5) {
-        return NextResponse.json(
-          { error: 'Rating must be an integer between 1 and 5' },
-          { status: 400 }
-        );
-      }
-    }
-
     const comment = await prisma.comment.create({
       data: {
         content: content.trim(),
-        rating: rating,
         authorId: session.user.id,
         buildId: id,
       },
@@ -85,30 +74,6 @@ export async function POST(
         },
       },
     });
-
-    // Update build's average rating if a rating was provided
-    if (rating) {
-      const allRatings = await prisma.comment.findMany({
-        where: {
-          buildId: id,
-          rating: { not: null },
-        },
-        select: { rating: true },
-      });
-
-      const ratings = allRatings.map(c => c.rating!).filter(r => r !== null);
-      const averageRating = ratings.length > 0
-        ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length
-        : null;
-
-      await prisma.build.update({
-        where: { id },
-        data: {
-          averageRating,
-          ratingCount: ratings.length,
-        },
-      });
-    }
 
     return NextResponse.json(comment, { status: 201 });
   } catch (error) {
