@@ -53,35 +53,39 @@ model Session {
 }
 
 model Build {
-  id          String   @id @default(cuid())
-  name        String
-  description String?
-  exportString String  // The Q-Up skill export string
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  upvotes     Int      @default(0)
-  downvotes   Int      @default(0)
-  views       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  tags        Tag[]    @relation("BuildToTag")
-  comments    Comment[]
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  exportString  String  // The Q-Up skill export string
+  authorId      String
+  author        User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  upvotes       Int      @default(0)
+  downvotes     Int      @default(0)
+  views         Int      @default(0)
+  averageRating Float?   // Average rating from 1-5
+  ratingCount   Int      @default(0) // Number of ratings
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  tags          Tag[]    @relation("BuildToTag")
+  comments      Comment[]
 }
 
 model Guide {
-  id          String   @id @default(cuid())
-  title       String
-  content     String   // Markdown content
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  summary     String?
-  upvotes     Int      @default(0)
-  downvotes   Int      @default(0)
-  views       Int      @default(0)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  tags        Tag[]    @relation("GuideToTag")
-  comments    Comment[]
+  id            String   @id @default(cuid())
+  title         String
+  content       String   // Markdown content
+  authorId      String
+  author        User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  summary       String?
+  upvotes       Int      @default(0)
+  downvotes     Int      @default(0)
+  views         Int      @default(0)
+  averageRating Float?   // Average rating from 1-5
+  ratingCount   Int      @default(0) // Number of ratings
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  tags          Tag[]    @relation("GuideToTag")
+  comments      Comment[]
 }
 
 model Tag {
@@ -94,6 +98,7 @@ model Tag {
 model Comment {
   id        String   @id @default(cuid())
   content   String
+  rating    Int?     // Optional rating from 1-5
   authorId  String
   author    User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
   buildId   String?
