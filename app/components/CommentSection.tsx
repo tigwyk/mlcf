@@ -182,7 +182,9 @@ export default function CommentSection({ resourceType, resourceId, user }: Comme
         </div>
       ) : (
         <div className="space-y-4">
-          {comments.map((comment) => (
+          {comments.map((comment) => {
+            console.log('Rendering comment:', comment.id, 'Author:', comment.author.username);
+            return (
             <div key={comment.id} className="bg-gray-900 border border-gray-700 rounded p-4">
               <div className="flex items-start gap-3">
                 {comment.author.avatar ? (
@@ -256,7 +258,8 @@ export default function CommentSection({ resourceType, resourceId, user }: Comme
                 </div>
               </div>
             </div>
-          ))}
+          );
+          })}
         </div>
       )}
     </div>
