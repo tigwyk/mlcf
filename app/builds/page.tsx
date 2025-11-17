@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Navigation from '@/app/components/Navigation';
-import StarRating from '@/app/components/StarRating';
 import { parseSkillExport } from '@/lib/skillParser';
 
 interface Build {
@@ -19,8 +18,6 @@ interface Build {
   upvotes: number;
   downvotes: number;
   views: number;
-  averageRating: number | null;
-  ratingCount: number;
   createdAt: string;
   tags: { id: string; name: string }[];
   _count: { comments: number };
@@ -134,14 +131,9 @@ export default function BuildsPage() {
                 <div className="flex justify-between items-start mb-3">
                   <div className="flex-1">
                     <h3 className="text-xl font-bold mb-1">{build.name}</h3>
-                    <div className="flex items-center gap-3 flex-wrap">
-                      <p className="text-sm text-gray-400">
-                        by {build.author?.username || 'Anonymous'} • <span className="text-purple-400">{getCharacterName(build.exportString)}</span>
-                      </p>
-                      {build.averageRating && build.ratingCount > 0 && (
-                        <StarRating rating={build.averageRating} size="sm" />
-                      )}
-                    </div>
+                    <p className="text-sm text-gray-400">
+                      by {build.author?.username || 'Anonymous'} • <span className="text-purple-400">{getCharacterName(build.exportString)}</span>
+                    </p>
                   </div>
                   <div className="flex gap-4 text-sm">
                     <div className="text-center">

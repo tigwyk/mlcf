@@ -8,7 +8,7 @@ import remarkGfm from 'remark-gfm';
 import Navigation from '@/app/components/Navigation';
 import BuildEmbed from '@/app/components/BuildEmbed';
 import CommentSection from '@/app/components/CommentSection';
-import StarRating from '@/app/components/StarRating';
+import VoteButtons from '@/app/components/VoteButtons';
 
 export const dynamic = 'force-dynamic';
 
@@ -25,8 +25,6 @@ interface Guide {
   upvotes: number;
   downvotes: number;
   views: number;
-  averageRating: number | null;
-  ratingCount: number;
   createdAt: string;
   tags: { id: string; name: string }[];
   comments: { id: string; content: string; author: string; createdAt: string }[];
@@ -193,12 +191,13 @@ export default function GuideDetailPage() {
             <p className="text-gray-300">
               by {guide.author?.username || 'Anonymous'} • {new Date(guide.createdAt).toLocaleDateString()}
             </p>
-            {guide.averageRating && guide.ratingCount > 0 && (
-              <div className="flex items-center gap-2">
-                <StarRating rating={guide.averageRating} size="md" />
-                <span className="text-sm text-gray-400">({guide.ratingCount} {guide.ratingCount === 1 ? 'rating' : 'ratings'})</span>
-              </div>
-            )}
+            <VoteButtons 
+              resourceType="guide" 
+              resourceId={guide.id} 
+              initialUpvotes={guide.upvotes} 
+              initialDownvotes={guide.downvotes}
+              user={user}
+            />
           </div>
         </div>
       </div>
